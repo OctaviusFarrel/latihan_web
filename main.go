@@ -20,5 +20,5 @@ func main() {
 
 	utils.CreateResource(router, "players").AddStoreRoute(handlers.InsertPlayer).AddIndexRoute(handlers.GetAllPlayers).AddShowRoute(handlers.GetPlayer).AddDestroyRoute(handlers.DeletePlayer).Build()
 
-	router.Run(":3000")
+	router.Run()
 }
