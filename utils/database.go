@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/subosito/gotenv"
 	. "okutajager.dev/gindile/models"
 )
 
@@ -14,10 +15,10 @@ var (
 	configErr, dbErr error
 	config           *pgxpool.Config
 	dbpool           *pgxpool.Pool
-	// config, configErr = pgxpool.ParseConfig(fmt.Sprintf("user=%q host=%q port=%q dbname=%q", "go_role", "localhost", "5432", "go_db"))
 )
 
 func init() {
+	gotenv.Load()
 	config, configErr = pgxpool.ParseConfig(fmt.Sprintf("user=%s password=%s host=%s port=%s dbname=%s", os.Getenv("USERNAME"), os.Getenv("PASSWORD"), os.Getenv("HOSTNAME"), os.Getenv("PORT_DATABASE"), os.Getenv("DATABASE")))
 	if configErr != nil {
 		println(configErr.Error())
@@ -71,6 +72,16 @@ func GetOneData(index string) (Player, error) {
 
 func PostOneData(player Player) bool {
 	_, err := dbpool.Query(context.Background(), "INSERT INTO players (name,age) VALUES ($1,$2)", player.Name, player.Age)
+
+	if err != nil {
+		return false
+	}
+
+	return true
+}
+
+func PutOneData(index string, player Player) bool {
+	_, err := dbpool.Query(context.Background(), "UPDATE players SET name = $1, age = $2 WHERE id = $3", player.Name, player.Age, index)
 
 	if err != nil {
 		return false

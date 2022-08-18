@@ -18,7 +18,7 @@ func main() {
 		halo.GET("/:name", handlers.GetSomethingWithName)
 	}
 
-	utils.CreateResource(router, "players").AddStoreRoute(handlers.InsertPlayer).AddIndexRoute(handlers.GetAllPlayers).AddShowRoute(handlers.GetPlayer).AddDestroyRoute(handlers.DeletePlayer).Build()
+	utils.CreateResource(router, "players").AddStoreRoute(handlers.InsertPlayer).AddIndexRoute(handlers.GetAllPlayers).AddShowRoute(handlers.GetPlayer).AddDestroyRoute(handlers.DeletePlayer).AddUpdateRoute(handlers.UpdatePlayer).Build()
 
 	router.Run()
 }

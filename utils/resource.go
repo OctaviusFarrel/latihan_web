@@ -1,10 +1,11 @@
 package utils
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/gin-gonic/gin"
+)
 
 func CreateResource(r *gin.Engine, endpoint string) *ResourceBuilder {
 	instance := ResourceBuilder{r.Group(endpoint), make(map[string]func(), 5)}
-
 	return &instance
 }
 

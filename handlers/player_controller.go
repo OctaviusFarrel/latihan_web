@@ -5,12 +5,13 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 	"okutajager.dev/gindile/models"
 	"okutajager.dev/gindile/utils"
 )
 
 func GetAllPlayers(c *gin.Context) {
-	c.JSON(http.StatusOK, map[string]interface{}{
+	c.JSON(http.StatusOK, gin.H{
 		"results": utils.GetAllData(),
 		"status":  http.StatusOK,
 	})
@@ -35,18 +36,24 @@ func GetPlayer(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, map[string]interface{}{
+	c.JSON(http.StatusOK, gin.H{
 		"status": http.StatusOK,
 		"result": player,
 	})
 }
 
 func InsertPlayer(c *gin.Context) {
-	player := models.Player{}
-	c.Bind(&player)
+	var formData models.Player
+	if err := c.ShouldBindWith(&formData, binding.JSON); err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "\"name\" or \"age\" is required",
+		})
+		return
+	}
+	c.Bind(&formData)
 
-	if utils.PostOneData(player) {
-		c.JSON(http.StatusOK, player)
+	if utils.PostOneData(formData) {
+		c.JSON(http.StatusOK, formData)
 	} else {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": "Error",
@@ -56,11 +63,19 @@ func InsertPlayer(c *gin.Context) {
 }
 
 func UpdatePlayer(c *gin.Context) {
-	player := models.Player{}
-	c.Bind(&player)
+	index := c.Param("index")
 
-	if utils.PostOneData(player) {
-		c.JSON(http.StatusOK, player)
+	var formData models.Player
+	// if err := c.ShouldBindWith(&formData, binding.JSON); err != nil {
+	// 	c.JSON(http.StatusBadRequest, gin.H{
+	// 		"message": "\"name\" or \"age\" is required",
+	// 	})
+	// 	return
+	// }
+	c.Bind(&formData)
+
+	if utils.PutOneData(index, formData) {
+		c.JSON(http.StatusOK, formData)
 	} else {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": "Error",
