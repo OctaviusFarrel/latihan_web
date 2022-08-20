@@ -8,7 +8,7 @@ import (
 
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/subosito/gotenv"
-	. "octaviusfarrel.dev/gindile/models"
+	. "octaviusfarrel.dev/latihan_web/models"
 )
 
 var (
@@ -37,7 +37,7 @@ func init() {
 func GetAllData() []Player {
 	test := []Player{}
 
-	rows, err := dbpool.Query(context.Background(), "SELECT name,age FROM players")
+	rows, err := dbpool.Query(context.Background(), "SELECT name,age FROM players ORDER BY id")
 
 	if err != nil {
 		println(err.Error())

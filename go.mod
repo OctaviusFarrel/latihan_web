@@ -1,4 +1,4 @@
-module octaviusfarrel.dev/gindile
+module octaviusfarrel.dev/latihan_web
 
 go 1.18
 

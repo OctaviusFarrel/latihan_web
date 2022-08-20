@@ -5,9 +5,8 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/gin-gonic/gin/binding"
-	"octaviusfarrel.dev/gindile/models"
-	"octaviusfarrel.dev/gindile/utils"
+	"octaviusfarrel.dev/latihan_web/models"
+	"octaviusfarrel.dev/latihan_web/utils"
 )
 
 func GetAllPlayers(c *gin.Context) {
@@ -43,16 +42,37 @@ func GetPlayer(c *gin.Context) {
 }
 
 func InsertPlayer(c *gin.Context) {
-	var formData models.Player
-	if err := c.ShouldBindWith(&formData, binding.JSON); err != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "\"name\" or \"age\" is required",
+	var formData map[string]interface{}
+	c.Bind(&formData)
+	if formData["name"] == nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "\"name\" is empty",
 		})
 		return
 	}
-	c.Bind(&formData)
+	if formData["age"] == nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "\"age\" is empty",
+		})
+		return
+	}
+	if !utils.IsTypeCorrect[string](formData["name"], false) {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "\"name\" is not a string",
+		})
+		return
+	}
 
-	if utils.PostOneData(formData) {
+	if !utils.IsTypeCorrect[float64](formData["age"], false) {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "\"age\" is not a number",
+		})
+		return
+	}
+
+	formData["age"] = int(formData["age"].(float64))
+
+	if utils.PostOneData(models.Player{Name: formData["name"].(string), Age: int8(formData["age"].(int))}) {
 		c.JSON(http.StatusOK, formData)
 	} else {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -80,7 +100,29 @@ func UpdatePlayer(c *gin.Context) {
 		}
 		return
 	}
-	c.Bind(&formData)
+
+	formUpdate := map[string]interface{}{}
+	c.Bind(&formUpdate)
+
+	if formUpdate["name"] != nil {
+		if !utils.IsTypeCorrect[string](formUpdate["name"], false) {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": "\"name\" is not a string",
+			})
+			return
+		}
+		formData.Name = formUpdate["name"].(string)
+	}
+
+	if formUpdate["age"] != nil {
+		if !utils.IsTypeCorrect[float64](formUpdate["age"], false) {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": "\"age\" is not a number",
+			})
+			return
+		}
+		formData.Age = int8(formUpdate["age"].(float64))
+	}
 
 	if utils.PutOneData(index, formData) {
 		c.JSON(http.StatusOK, formData)
