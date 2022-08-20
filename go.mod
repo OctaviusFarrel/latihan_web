@@ -1,4 +1,4 @@
-module okutajager.dev/gindile
+module octaviusfarrel.dev/gindile
 
 go 1.18
 

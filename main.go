@@ -3,8 +3,8 @@ package main
 import (
 	"github.com/gin-gonic/gin"
 
-	"okutajager.dev/gindile/handlers"
-	"okutajager.dev/gindile/utils"
+	"octaviusfarrel.dev/gindile/handlers"
+	"octaviusfarrel.dev/gindile/utils"
 )
 
 func main() {

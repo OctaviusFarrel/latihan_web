@@ -6,8 +6,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
-	"okutajager.dev/gindile/models"
-	"okutajager.dev/gindile/utils"
+	"octaviusfarrel.dev/gindile/models"
+	"octaviusfarrel.dev/gindile/utils"
 )
 
 func GetAllPlayers(c *gin.Context) {
@@ -65,13 +65,21 @@ func InsertPlayer(c *gin.Context) {
 func UpdatePlayer(c *gin.Context) {
 	index := c.Param("index")
 
-	var formData models.Player
-	// if err := c.ShouldBindWith(&formData, binding.JSON); err != nil {
-	// 	c.JSON(http.StatusBadRequest, gin.H{
-	// 		"message": "\"name\" or \"age\" is required",
-	// 	})
-	// 	return
-	// }
+	formData, err := utils.GetOneData(index)
+	if err != nil {
+		if strings.Compare(err.Error(), "404") == 0 {
+			c.JSON(http.StatusNotFound, gin.H{
+				"status":  http.StatusNotFound,
+				"message": "data not found",
+			})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"status":  http.StatusInternalServerError,
+				"message": err.Error(),
+			})
+		}
+		return
+	}
 	c.Bind(&formData)
 
 	if utils.PutOneData(index, formData) {

@@ -8,7 +8,7 @@ import (
 
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/subosito/gotenv"
-	. "okutajager.dev/gindile/models"
+	. "octaviusfarrel.dev/gindile/models"
 )
 
 var (
