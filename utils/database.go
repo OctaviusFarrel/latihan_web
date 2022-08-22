@@ -37,7 +37,7 @@ func init() {
 func GetAllData() []Player {
 	test := []Player{}
 
-	rows, err := dbpool.Query(context.Background(), "SELECT name,age FROM players ORDER BY id")
+	rows, err := dbpool.Query(context.Background(), "SELECT * FROM players ORDER BY id")
 
 	if err != nil {
 		println(err.Error())
@@ -46,7 +46,7 @@ func GetAllData() []Player {
 
 	for rows.Next() {
 		player := Player{}
-		rows.Scan(&player.Name, &player.Age)
+		rows.Scan(&player.Id, &player.Name, &player.Age)
 		test = append(test, player)
 	}
 
@@ -54,7 +54,7 @@ func GetAllData() []Player {
 }
 
 func GetOneData(index string) (Player, error) {
-	rows, err := dbpool.Query(context.Background(), "SELECT name,age FROM players WHERE id = $1", index)
+	rows, err := dbpool.Query(context.Background(), "SELECT * FROM players WHERE id = $1", index)
 
 	if err != nil {
 		return Player{}, err
@@ -62,7 +62,7 @@ func GetOneData(index string) (Player, error) {
 
 	player := Player{}
 	if rows.Next() {
-		rows.Scan(&player.Name, &player.Age)
+		rows.Scan(&player.Id, &player.Name, &player.Age)
 	} else {
 		return player, errors.New("404")
 	}
@@ -90,16 +90,12 @@ func PutOneData(index string, player Player) bool {
 	return true
 }
 
-func DeleteOneData(index string) (Player, error) {
-	rows, err := dbpool.Query(context.Background(), "DELETE FROM players WHERE id = $1", index)
+func DeleteOneData(index string) error {
+	_, err := dbpool.Query(context.Background(), "DELETE FROM players WHERE id = $1", index)
 
 	if err != nil {
-		return Player{}, err
+		return err
 	}
 
-	player := Player{Name: "Unknown", Age: 0}
-	rows.Next()
-	rows.Scan(&player.Name, &player.Age)
-
-	return player, nil
+	return nil
 }

@@ -137,7 +137,7 @@ func UpdatePlayer(c *gin.Context) {
 func DeletePlayer(c *gin.Context) {
 	index := c.Param("index")
 
-	player, err := utils.DeleteOneData(index)
+	err := utils.DeleteOneData(index)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
@@ -145,6 +145,8 @@ func DeletePlayer(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, player)
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Player deleted",
+	})
 
 }
