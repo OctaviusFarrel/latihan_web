@@ -14,7 +14,7 @@ import (
 var (
 	configErr, dbErr error
 	config           *pgxpool.Config
-	dbpool           *pgxpool.Pool
+	Dbpool           *pgxpool.Pool
 )
 
 func init() {
@@ -25,10 +25,10 @@ func init() {
 		os.Exit(1)
 	}
 
-	dbpool, dbErr = pgxpool.ConnectConfig(context.Background(), config)
+	Dbpool, dbErr = pgxpool.ConnectConfig(context.Background(), config)
 	if dbErr != nil {
 		println(dbErr.Error())
-		defer dbpool.Close()
+		defer Dbpool.Close()
 		os.Exit(1)
 	}
 
@@ -37,7 +37,7 @@ func init() {
 func GetAllData() []Player {
 	test := []Player{}
 
-	rows, err := dbpool.Query(context.Background(), "SELECT * FROM players ORDER BY id")
+	rows, err := Dbpool.Query(context.Background(), "SELECT * FROM players ORDER BY id")
 
 	if err != nil {
 		println(err.Error())
@@ -54,7 +54,7 @@ func GetAllData() []Player {
 }
 
 func GetOneData(index string) (Player, error) {
-	rows, err := dbpool.Query(context.Background(), "SELECT * FROM players WHERE id = $1", index)
+	rows, err := Dbpool.Query(context.Background(), "SELECT * FROM players WHERE id = $1", index)
 
 	if err != nil {
 		return Player{}, err
@@ -71,7 +71,7 @@ func GetOneData(index string) (Player, error) {
 }
 
 func PostOneData(player Player) bool {
-	_, err := dbpool.Query(context.Background(), "INSERT INTO players (name,age) VALUES ($1,$2)", player.Name, player.Age)
+	_, err := Dbpool.Query(context.Background(), "INSERT INTO players (name,age) VALUES ($1,$2)", player.Name, player.Age)
 
 	if err != nil {
 		return false
@@ -81,7 +81,7 @@ func PostOneData(player Player) bool {
 }
 
 func PutOneData(index string, player Player) bool {
-	_, err := dbpool.Query(context.Background(), "UPDATE players SET name = $1, age = $2 WHERE id = $3", player.Name, player.Age, index)
+	_, err := Dbpool.Query(context.Background(), "UPDATE players SET name = $1, age = $2 WHERE id = $3", player.Name, player.Age, index)
 
 	if err != nil {
 		return false
@@ -91,7 +91,7 @@ func PutOneData(index string, player Player) bool {
 }
 
 func DeleteOneData(index string) error {
-	_, err := dbpool.Query(context.Background(), "DELETE FROM players WHERE id = $1", index)
+	_, err := Dbpool.Query(context.Background(), "DELETE FROM players WHERE id = $1", index)
 
 	if err != nil {
 		return err
