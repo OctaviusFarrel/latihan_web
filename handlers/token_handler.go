@@ -1,23 +1,30 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
-	"time"
+	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/subosito/gotenv"
 )
 
-func GetToken(c *gin.Context) {
+var secretKey string
+
+func init() {
+	gotenv.Load()
+	secretKey = os.Getenv("TOKEN_SECRET")
+}
+
+func GetReadToken(c *gin.Context) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"foo": "bar",
-		"nbf": time.Date(2015, 10, 10, 12, 0, 0, 0, time.UTC).Unix(),
+		"read": true,
+		"bruh": true,
 	})
-	tokenString, err := token.SignedString([]byte("test"))
+	tokenString, err := token.SignedString([]byte(secretKey))
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"message": "Failed",
 			"error":   err.Error(),
 		})
@@ -30,26 +37,22 @@ func GetToken(c *gin.Context) {
 	})
 }
 
-func ParseToken(c *gin.Context) {
-	token, err := jwt.Parse(c.GetHeader("Token"), func(token *jwt.Token) (interface{}, error) {
-		// Don't forget to validate the alg is what you expect:
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-		}
-
-		// hmacSampleSecret is a []byte containing your secret, e.g. []byte("my_secret_key")
-		return []byte("test"), nil
+func GetWriteToken(c *gin.Context) {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"read": true,
 	})
+	tokenString, err := token.SignedString([]byte(secretKey))
 
-	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "Success",
-			"data":    claims,
-		})
-	} else {
-		c.JSON(http.StatusBadRequest, gin.H{
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"message": "Failed",
-			"data":    err.Error(),
+			"error":   err.Error(),
 		})
+		return
 	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Success",
+		"token":   tokenString,
+	})
 }

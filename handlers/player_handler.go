@@ -11,7 +11,7 @@ import (
 
 func GetAllPlayers(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
-		"results": utils.GetAllData(),
+		"results": utils.GetAllPlayers(),
 		"status":  http.StatusOK,
 	})
 }
@@ -19,7 +19,7 @@ func GetAllPlayers(c *gin.Context) {
 func GetPlayer(c *gin.Context) {
 	index := c.Param("index")
 
-	player, err := utils.GetOneData(index)
+	player, err := utils.GetPlayer(index)
 	if err != nil {
 		if strings.Compare(err.Error(), "404") == 0 {
 			c.JSON(http.StatusNotFound, gin.H{
@@ -45,26 +45,26 @@ func InsertPlayer(c *gin.Context) {
 	var formData map[string]interface{}
 	c.Bind(&formData)
 	if formData["name"] == nil {
-		c.JSON(http.StatusBadRequest, gin.H{
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"message": "\"name\" is empty",
 		})
 		return
 	}
 	if formData["age"] == nil {
-		c.JSON(http.StatusBadRequest, gin.H{
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"message": "\"age\" is empty",
 		})
 		return
 	}
 	if !utils.IsTypeCorrect[string](formData["name"], false) {
-		c.JSON(http.StatusBadRequest, gin.H{
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"message": "\"name\" is not a string",
 		})
 		return
 	}
 
 	if !utils.IsTypeCorrect[float64](formData["age"], false) {
-		c.JSON(http.StatusBadRequest, gin.H{
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"message": "\"age\" is not a number",
 		})
 		return
@@ -72,10 +72,10 @@ func InsertPlayer(c *gin.Context) {
 
 	formData["age"] = int(formData["age"].(float64))
 
-	if utils.PostOneData(models.Player{Name: formData["name"].(string), Age: int8(formData["age"].(int))}) {
+	if utils.InsertPlayer(models.Player{Name: formData["name"].(string), Age: int8(formData["age"].(int))}) {
 		c.JSON(http.StatusOK, formData)
 	} else {
-		c.JSON(http.StatusBadRequest, gin.H{
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"message": "Error",
 		})
 	}
@@ -85,7 +85,7 @@ func InsertPlayer(c *gin.Context) {
 func UpdatePlayer(c *gin.Context) {
 	index := c.Param("index")
 
-	formData, err := utils.GetOneData(index)
+	formData, err := utils.GetPlayer(index)
 	if err != nil {
 		if strings.Compare(err.Error(), "404") == 0 {
 			c.JSON(http.StatusNotFound, gin.H{
@@ -124,7 +124,7 @@ func UpdatePlayer(c *gin.Context) {
 		formData.Age = int8(formUpdate["age"].(float64))
 	}
 
-	if utils.PutOneData(index, formData) {
+	if utils.UpdatePlayer(index, formData) {
 		c.JSON(http.StatusOK, formData)
 	} else {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -137,7 +137,7 @@ func UpdatePlayer(c *gin.Context) {
 func DeletePlayer(c *gin.Context) {
 	index := c.Param("index")
 
-	err := utils.DeleteOneData(index)
+	err := utils.DeletePlayer(index)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),

@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"octaviusfarrel.dev/latihan_web/handlers"
+	"octaviusfarrel.dev/latihan_web/middlewares"
 )
 
 // var authConfig *oauth2.Config
@@ -33,19 +34,21 @@ func main() {
 		halo.GET("/:name", handlers.GetSomethingWithName)
 	}
 
-	app.GET("/goauth", handlers.GetToken)
-	app.POST("/goauth", handlers.ParseToken)
+	app.GET("/goauth", handlers.GetReadToken)
+	// app.POST("/goauth", handlers.ParseToken)
 
 	// utils.CreateResource(app, "players").AddStoreRoute(handlers.InsertPlayer).AddIndexRoute(handlers.GetAllPlayers).AddShowRoute(handlers.GetPlayer).AddDestroyRoute(handlers.DeletePlayer).AddUpdateRoute(handlers.UpdatePlayer).Build()
 	players := app.Group("/players")
 	{
-		players.GET("/", handlers.GetAllPlayers)
-		players.GET("/:index", handlers.GetPlayer)
-		players.POST("/", handlers.InsertPlayer)
-		players.PUT("/:index", handlers.UpdatePlayer)
-		players.DELETE("/:index", handlers.DeletePlayer)
+		players.Use(middlewares.ReadRequiredTokenMiddleware()).GET("/", handlers.GetAllPlayers)
+		players.Use(middlewares.ReadRequiredTokenMiddleware()).GET("/:index", handlers.GetPlayer)
+		players.Use(middlewares.WriteRequiredTokenMiddleware()).POST("/", handlers.InsertPlayer)
+		players.Use(middlewares.WriteRequiredTokenMiddleware()).PUT("/:index", handlers.UpdatePlayer)
+		players.Use(middlewares.WriteRequiredTokenMiddleware()).DELETE("/:index", handlers.DeletePlayer)
 	}
-	// players.Use(ginoauth2.Auth(zalando.)))
+
+	app.POST("/login", handlers.Login)
+	app.POST("/register", handlers.Register)
 
 	app.Run()
 }
