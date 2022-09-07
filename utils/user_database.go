@@ -7,7 +7,6 @@ import (
 	"fmt"
 
 	"octaviusfarrel.dev/latihan_web/models"
-	// . "octaviusfarrel.dev/latihan_web/models"
 )
 
 func CreateUser(user struct {

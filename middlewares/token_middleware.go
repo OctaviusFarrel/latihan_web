@@ -1,6 +1,7 @@
 package middlewares
 
 import (
+	"fmt"
 	"net/http"
 	"os"
 	"regexp"
@@ -43,8 +44,9 @@ func ReadRequiredTokenMiddleware() gin.HandlerFunc {
 				})
 				return
 			}
+			fmt.Println(token)
 
-			if len(regexp.MustCompile(token).FindString("write")) == 0 {
+			if len(regexp.MustCompile(token).FindString("read")) == 0 {
 				c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 					"message": "Failed",
 					"data":    "insufficient permission",
