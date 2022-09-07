@@ -34,10 +34,6 @@ func main() {
 		halo.GET("/:name", handlers.GetSomethingWithName)
 	}
 
-	app.GET("/goauth", handlers.GetReadToken)
-	// app.POST("/goauth", handlers.ParseToken)
-
-	// utils.CreateResource(app, "players").AddStoreRoute(handlers.InsertPlayer).AddIndexRoute(handlers.GetAllPlayers).AddShowRoute(handlers.GetPlayer).AddDestroyRoute(handlers.DeletePlayer).AddUpdateRoute(handlers.UpdatePlayer).Build()
 	players := app.Group("/players")
 	{
 		players.Use(middlewares.ReadRequiredTokenMiddleware()).GET("/", handlers.GetAllPlayers)
