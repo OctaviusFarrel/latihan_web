@@ -1,23 +1,13 @@
 package middlewares
 
 import (
-	"fmt"
 	"net/http"
-	"os"
 	"regexp"
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/subosito/gotenv"
 	"octaviusfarrel.dev/latihan_web/utils"
 )
-
-var secretKey string
-
-func init() {
-	gotenv.Load()
-	secretKey = os.Getenv("TOKEN_SECRET")
-}
 
 func ReadRequiredTokenMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -44,7 +34,6 @@ func ReadRequiredTokenMiddleware() gin.HandlerFunc {
 				})
 				return
 			}
-			fmt.Println(token)
 
 			if len(regexp.MustCompile(token).FindString("read")) == 0 {
 				c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{

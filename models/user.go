@@ -1,6 +1,7 @@
 package models
 
-type User struct {
-	Id       int
-	Username string
+type UserModel struct {
+	Id         int
+	Username   string
+	Permission string
 }

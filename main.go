@@ -2,9 +2,10 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
-
-	"octaviusfarrel.dev/latihan_web/handlers"
+	"octaviusfarrel.dev/latihan_web/controllers"
 	"octaviusfarrel.dev/latihan_web/middlewares"
+	"octaviusfarrel.dev/latihan_web/repositories/pgsql"
+	"octaviusfarrel.dev/latihan_web/services"
 )
 
 // var authConfig *oauth2.Config
@@ -26,25 +27,42 @@ func main() {
 	app := gin.New()
 	app.Use(gin.Logger())
 
-	app.GET("/", handlers.GetSomething)
+	userRepo := pgsql.NewUserRepo()
+	playerRepo := pgsql.NewPlayerRepo()
 
-	halo := app.Group("/halo")
-	{
-		halo.GET("/", handlers.GetSomething)
-		halo.GET("/:name", handlers.GetSomethingWithName)
-	}
+	userUseCase := services.NewUserUseCase(userRepo)
+	playerUseCase := services.NewPlayerUseCase(playerRepo)
+
+	userController := controllers.NewUserHandler(userUseCase)
+	playerController := controllers.NewPlayerHandler(playerUseCase)
+
+	// app.GET("/", controllers.GetSomething)
+
+	// halo := app.Group("/halo")
+	// {
+	// 	halo.GET("/", controllers.GetSomething)
+	// 	halo.GET("/:name", controllers.GetSomethingWithName)
+	// }
 
 	players := app.Group("/players")
 	{
-		players.Use(middlewares.ReadRequiredTokenMiddleware()).GET("/", handlers.GetAllPlayers)
-		players.Use(middlewares.ReadRequiredTokenMiddleware()).GET("/:index", handlers.GetPlayer)
-		players.Use(middlewares.WriteRequiredTokenMiddleware()).POST("/", handlers.InsertPlayer)
-		players.Use(middlewares.WriteRequiredTokenMiddleware()).PUT("/:index", handlers.UpdatePlayer)
-		players.Use(middlewares.WriteRequiredTokenMiddleware()).DELETE("/:index", handlers.DeletePlayer)
+		readToken := players.Group("")
+		readToken.Use(middlewares.ReadRequiredTokenMiddleware())
+		{
+			readToken.GET("/", playerController.AllPlayers)
+			readToken.GET("/:index", playerController.GetPlayer)
+		}
+
+		writeToken := players.Group("")
+		writeToken.Use(middlewares.WriteRequiredTokenMiddleware())
+		{
+			writeToken.POST("/", playerController.InsertPlayer)
+			writeToken.PUT("/:index", playerController.UpdatePlayer)
+			writeToken.DELETE("/:index", playerController.DeletePlayer)
+		}
 	}
 
-	app.POST("/login", handlers.Login)
-	app.POST("/register", handlers.Register)
-
+	app.POST("/login", userController.GetUserByUsername)
+	app.POST("/register", userController.InsertUser)
 	app.Run()
 }

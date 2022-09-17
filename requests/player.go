@@ -1,7 +1,6 @@
-package models
+package requests
 
-type PlayerModel struct {
-	Id   int    `form:"id" binding:"required"`
+type PlayerRequest struct {
 	Name string `form:"name" binding:"required"`
 	Age  int8   `form:"age" binding:"required"`
 }
