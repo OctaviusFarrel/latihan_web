@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 
@@ -21,8 +22,8 @@ func IsTypeCorrect[T interface{}](value interface{}, debug bool) bool {
 
 var tokenRepo pgsql.ITokenRepo = pgsql.NewTokenRepo()
 
-func ValidateToken(token string) (result string, success bool) {
-	result, err := tokenRepo.ValidateToken(token)
+func ValidateToken(token string, ctx context.Context) (result string, success bool) {
+	result, err := tokenRepo.ValidateToken(token, ctx)
 	if err != nil {
 		success = false
 	}

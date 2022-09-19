@@ -34,8 +34,8 @@ type UserUsecase struct {
 	tokenRepo pgsql.ITokenRepo
 }
 
-func NewUserUseCase(userRepo pgsql.IUserRepo) IUserUsecase {
-	return &UserUsecase{}
+func NewUserUseCase(userRepo pgsql.IUserRepo, tokenRepo pgsql.ITokenRepo) *UserUsecase {
+	return &UserUsecase{userRepo: userRepo, tokenRepo: tokenRepo}
 }
 
 func (useCase *UserUsecase) GetUserByUsername(c context.Context, requestBody requests.UserRequest) (response responses.UserWithToken, statusCode int, err error) {

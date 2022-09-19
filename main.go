@@ -29,8 +29,9 @@ func main() {
 
 	userRepo := pgsql.NewUserRepo()
 	playerRepo := pgsql.NewPlayerRepo()
+	tokenRepo := pgsql.NewTokenRepo()
 
-	userUseCase := services.NewUserUseCase(userRepo)
+	userUseCase := services.NewUserUseCase(userRepo, tokenRepo)
 	playerUseCase := services.NewPlayerUseCase(playerRepo)
 
 	userController := controllers.NewUserHandler(userUseCase)
@@ -38,11 +39,11 @@ func main() {
 
 	// app.GET("/", controllers.GetSomething)
 
-	// halo := app.Group("/halo")
-	// {
-	// 	halo.GET("/", controllers.GetSomething)
-	// 	halo.GET("/:name", controllers.GetSomethingWithName)
-	// }
+	halo := app.Group("/halo")
+	{
+		halo.GET("/", controllers.GetSomething)
+		halo.GET("/:name", controllers.GetSomethingWithName)
+	}
 
 	players := app.Group("/players")
 	{

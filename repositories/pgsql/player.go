@@ -19,7 +19,7 @@ type IPlayerRepo interface {
 
 type PlayerRepo struct{}
 
-func NewPlayerRepo() IPlayerRepo {
+func NewPlayerRepo() *PlayerRepo {
 	return &PlayerRepo{}
 }
 

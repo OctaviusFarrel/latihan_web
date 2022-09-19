@@ -21,8 +21,8 @@ type PlayerUseCase struct {
 	playerRepo pgsql.IPlayerRepo
 }
 
-func NewPlayerUseCase(playerRepo pgsql.IPlayerRepo) IPlayerUseCase {
-	return &PlayerUseCase{}
+func NewPlayerUseCase(playerRepo pgsql.IPlayerRepo) *PlayerUseCase {
+	return &PlayerUseCase{playerRepo: playerRepo}
 }
 
 func (playerUseCase *PlayerUseCase) AllPlayers(c context.Context) (response responses.AllPlayers, code int, err error) {

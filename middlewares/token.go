@@ -12,74 +12,84 @@ import (
 func ReadRequiredTokenMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if value := c.GetHeader("Token"); len(value) == 0 {
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			c.JSON(http.StatusBadRequest, gin.H{
 				"message": "Failed",
 				"data":    "Token is empty",
 			})
+			c.Abort()
 			return
 		} else {
-			token, returned := utils.ValidateToken(value)
+			token, returned := utils.ValidateToken(value, c.Request.Context())
 			if !returned {
-				c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+				c.JSON(http.StatusBadRequest, gin.H{
 					"message": "Failed",
 					"data":    "invalid token",
 				})
+				c.Abort()
 				return
 			}
 			value := strings.Split(value, "|")
 			if len(value) < 2 {
-				c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+				c.JSON(http.StatusBadRequest, gin.H{
 					"message": "Failed",
 					"data":    "invalid token",
 				})
+				c.Abort()
 				return
 			}
 
 			if len(regexp.MustCompile(token).FindString("read")) == 0 {
-				c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+				c.JSON(http.StatusBadRequest, gin.H{
 					"message": "Failed",
 					"data":    "insufficient permission",
 				})
+				c.Abort()
 				return
 			}
 		}
+		c.Next()
 	}
 }
 
 func WriteRequiredTokenMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if value := c.GetHeader("Token"); len(value) == 0 {
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			c.JSON(http.StatusBadRequest, gin.H{
 				"message": "Failed",
 				"data":    "Token is empty",
 			})
+			c.Abort()
 			return
 		} else {
-			token, returned := utils.ValidateToken(value)
+			token, returned := utils.ValidateToken(value, c.Request.Context())
 			if !returned {
-				c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+				c.JSON(http.StatusBadRequest, gin.H{
 					"message": "Failed",
 					"data":    "invalid token",
 				})
+				c.Abort()
 				return
 			}
 			value := strings.Split(value, "|")
 			if len(value) < 2 {
-				c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+				c.JSON(http.StatusBadRequest, gin.H{
 					"message": "Failed",
 					"data":    "invalid token",
 				})
+				c.Abort()
 				return
 			}
 
 			if len(regexp.MustCompile(token).FindString("write")) == 0 {
-				c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+				c.JSON(http.StatusBadRequest, gin.H{
 					"message": "Failed",
 					"data":    "insufficient permission",
 				})
+				c.Abort()
 				return
 			}
 		}
+		c.Next()
 	}
 }
 

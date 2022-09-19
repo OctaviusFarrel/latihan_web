@@ -7,12 +7,12 @@ import (
 
 type ITokenRepo interface {
 	InsertTokenByUser(userId int, token string) (result string, err error)
-	ValidateToken(token string) (result string, err error)
+	ValidateToken(token string, ctx context.Context) (result string, err error)
 }
 
 type TokenRepo struct{}
 
-func NewTokenRepo() ITokenRepo {
+func NewTokenRepo() *TokenRepo {
 	return &TokenRepo{}
 }
 
@@ -42,8 +42,8 @@ func (tokenRepo *TokenRepo) InsertTokenByUser(userId int, token string) (result 
 	return
 }
 
-func (tokenRepo *TokenRepo) ValidateToken(token string) (result string, err error) {
-	row, err := dbPool.Query(context.Background(), "SELECT user_id from user_tokens WHERE token = $1", token)
+func (tokenRepo *TokenRepo) ValidateToken(token string, ctx context.Context) (result string, err error) {
+	row, err := dbPool.Query(ctx, "SELECT user_id from user_tokens WHERE token = $1", token)
 	if err != nil {
 		return
 	}
