@@ -3,7 +3,6 @@ package main
 import (
 	"github.com/gin-gonic/gin"
 	"octaviusfarrel.dev/latihan_web/controllers"
-	"octaviusfarrel.dev/latihan_web/middlewares"
 	"octaviusfarrel.dev/latihan_web/repositories/pgsql"
 	"octaviusfarrel.dev/latihan_web/services"
 )
@@ -48,14 +47,14 @@ func main() {
 	players := app.Group("/players")
 	{
 		readToken := players.Group("")
-		readToken.Use(middlewares.ReadRequiredTokenMiddleware())
+		// readToken.Use(middlewares.ReadRequiredTokenMiddleware())
 		{
 			readToken.GET("/", playerController.AllPlayers)
 			readToken.GET("/:index", playerController.GetPlayer)
 		}
 
 		writeToken := players.Group("")
-		writeToken.Use(middlewares.WriteRequiredTokenMiddleware())
+		// writeToken.Use(middlewares.WriteRequiredTokenMiddleware())
 		{
 			writeToken.POST("/", playerController.InsertPlayer)
 			writeToken.PUT("/:index", playerController.UpdatePlayer)
