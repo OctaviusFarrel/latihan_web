@@ -48,25 +48,26 @@ func (useCase *UserUsecase) GetUserByUsername(c context.Context, requestBody req
 
 		return
 	}
-	token, err := createToken(user)
-	if err != nil {
-		statusCode = http.StatusInternalServerError
-		responses.NewBaseResponseStatusCode(statusCode, &response.BaseResponse, err)
+	// token, err := createToken(user)
+	// if err != nil {
+	// 	statusCode = http.StatusInternalServerError
+	// 	responses.NewBaseResponseStatusCode(statusCode, &response.BaseResponse, err)
 
-		return
-	}
+	// 	return
+	// }
 
-	token, err = useCase.tokenRepo.InsertTokenByUser(user.Id, token)
+	// token, err = useCase.tokenRepo.InsertTokenByUser(int(user.ID), token)
 
-	if err != nil {
-		statusCode = http.StatusInternalServerError
-		responses.NewBaseResponseStatusCode(statusCode, &response.BaseResponse, err)
+	// if err != nil {
+	// 	statusCode = http.StatusInternalServerError
+	// 	responses.NewBaseResponseStatusCode(statusCode, &response.BaseResponse, err)
 
-		return
-	}
+	// 	return
+	// }
 
 	statusCode = http.StatusOK
-	response.Token = token
+	response.Token = user.Username
+	response.User.User = user
 	responses.NewBaseResponseStatusCode(statusCode, &response.BaseResponse, err)
 
 	return

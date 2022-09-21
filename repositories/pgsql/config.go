@@ -32,6 +32,11 @@ var (
 			println(err.Error())
 			os.Exit(1)
 		}
+
 		return
 	}()
 )
+
+func AutoMigrate(model any) {
+	dbPool.AutoMigrate(&model)
+}

@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/gin-gonic/gin"
 	"octaviusfarrel.dev/latihan_web/controllers"
+	"octaviusfarrel.dev/latihan_web/models"
 	"octaviusfarrel.dev/latihan_web/repositories/pgsql"
 	"octaviusfarrel.dev/latihan_web/services"
 )
@@ -37,6 +38,11 @@ func main() {
 	playerController := controllers.NewPlayerHandler(playerUseCase)
 
 	// app.GET("/", controllers.GetSomething)
+
+	{
+		pgsql.AutoMigrate(&models.PlayerModel{})
+		pgsql.AutoMigrate(&models.UserModel{})
+	}
 
 	halo := app.Group("/halo")
 	{

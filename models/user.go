@@ -1,10 +1,16 @@
 package models
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+)
 
 type UserModel struct {
 	gorm.Model
-	Id         int
-	Username   string
+	Username   string `gorm:"unique"`
 	Permission string
+	Password   string `gorm:"" json:"-"`
+}
+
+func (UserModel) TableName() string {
+	return "users"
 }
