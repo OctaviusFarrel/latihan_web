@@ -39,8 +39,6 @@ func main() {
 	playerController := controllers.NewPlayerHandler(playerUseCase)
 	reqresController := controllers.NewReqresHandler(reqresUseCase)
 
-	// app.GET("/", controllers.GetSomething)
-
 	{
 		pgsql.AutoMigrate(&models.PlayerModel{})
 		pgsql.AutoMigrate(&models.UserModel{})

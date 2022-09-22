@@ -1,6 +1,6 @@
 package requests
 
 type PlayerRequest struct {
-	Name string `form:"name" binding:"required"`
-	Age  int8   `form:"age" binding:"required"`
+	Name string `json:"name" binding:"required"`
+	Age  int8   `json:"age" binding:"required"`
 }
