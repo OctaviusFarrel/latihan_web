@@ -33,9 +33,11 @@ func main() {
 
 	userUseCase := services.NewUserUseCase(userRepo, tokenRepo)
 	playerUseCase := services.NewPlayerUseCase(playerRepo)
+	reqresUseCase := services.NewReqresUseCase()
 
 	userController := controllers.NewUserHandler(userUseCase)
 	playerController := controllers.NewPlayerHandler(playerUseCase)
+	reqresController := controllers.NewReqresHandler(reqresUseCase)
 
 	// app.GET("/", controllers.GetSomething)
 
@@ -48,6 +50,15 @@ func main() {
 	{
 		halo.GET("/", controllers.GetSomething)
 		halo.GET("/:name", controllers.GetSomethingWithName)
+	}
+
+	reqres := app.Group("/reqres")
+	{
+		reqres.GET("/", reqresController.AllUsers)
+		reqres.GET("/:index", reqresController.GetUser)
+		reqres.POST("/", reqresController.InsertUser)
+		reqres.PUT("/:index", reqresController.UpdateUser)
+		reqres.DELETE("/:index", reqresController.DeleteUser)
 	}
 
 	players := app.Group("/players")
