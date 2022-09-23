@@ -1,6 +1,9 @@
 package main
 
 import (
+	"fmt"
+
+	"github.com/Shopify/sarama"
 	"github.com/gin-gonic/gin"
 	"octaviusfarrel.dev/latihan_web/controllers"
 	"octaviusfarrel.dev/latihan_web/models"
@@ -8,24 +11,22 @@ import (
 	"octaviusfarrel.dev/latihan_web/services"
 )
 
-// var authConfig *oauth2.Config
-
-// func init() {
-// 	gotenv.Load()
-// 	authConfig = &oauth2.Config{
-// 		ClientID:     os.Getenv("CLIENT_ID"),
-// 		ClientSecret: os.Getenv("CLIENT_SECRET"),
-// 		RedirectURL:  "http://localhost:8080/auth",
-// 		Scopes: []string{
-// 			"https://www.googleapis.com/auth/userinfo.profile",
-// 		},
-// 		Endpoint: google.Endpoint,
-// 	}
-// }
-
 func main() {
 	app := gin.New()
 	app.Use(gin.Logger())
+
+	{
+		producer, err := sarama.NewAsyncProducer([]string{"localhost:9092"}, sarama.NewConfig())
+
+		if err != nil {
+			return
+		}
+
+		app.Use(func(ctx *gin.Context) {
+			message := &sarama.ProducerMessage{Topic: "logs", Value: sarama.StringEncoder(fmt.Sprintf("Handler : %s", ctx.HandlerName()))}
+			producer.Input() <- message
+		})
+	}
 
 	userRepo := pgsql.NewUserRepo()
 	playerRepo := pgsql.NewPlayerRepo()

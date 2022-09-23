@@ -1,8 +1,6 @@
 package controllers
 
 import (
-	"encoding/json"
-	"io"
 	"net/http"
 	"strconv"
 
@@ -44,18 +42,9 @@ func (reqresHandler *ReqresHandler) GetUser(c *gin.Context) {
 
 func (reqresHandler *ReqresHandler) InsertUser(c *gin.Context) {
 
-	jsonBytes, err := io.ReadAll(c.Request.Body)
-
-	if err != nil {
-		response := responses.BaseResponse{}
-
-		responses.NewBaseResponseStatusCode(http.StatusInternalServerError, &responses.BaseResponse{}, err)
-		c.JSON(http.StatusInternalServerError, response)
-		return
-	}
-
 	var userRequest requests.ReqresUserRequest
-	err = json.Unmarshal(jsonBytes, &userRequest)
+
+	err := c.Bind(&userRequest)
 
 	if err != nil {
 		response := responses.BaseResponse{}
@@ -89,18 +78,9 @@ func (reqresHandler *ReqresHandler) UpdateUser(c *gin.Context) {
 		return
 	}
 
-	jsonBytes, err := io.ReadAll(c.Request.Body)
-
-	if err != nil {
-		response := responses.BaseResponse{}
-
-		responses.NewBaseResponseStatusCode(http.StatusInternalServerError, &responses.BaseResponse{}, err)
-		c.JSON(http.StatusInternalServerError, response)
-		return
-	}
-
 	var userRequest requests.ReqresUserRequest
-	err = json.Unmarshal(jsonBytes, &userRequest)
+
+	err = c.Bind(&userRequest)
 
 	if err != nil {
 		response := responses.BaseResponse{}

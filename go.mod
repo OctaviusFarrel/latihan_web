@@ -3,13 +3,13 @@ module octaviusfarrel.dev/latihan_web
 go 1.18
 
 require (
+	github.com/Shopify/sarama v1.36.0
 	github.com/gin-gonic/gin v1.8.1
 	github.com/golang-jwt/jwt/v4 v4.4.2
 	github.com/parnurzeal/gorequest v0.2.16
 	github.com/subosito/gotenv v1.4.1
 	gorm.io/driver/postgres v1.3.10
 	gorm.io/gorm v1.23.9
-	github.com/Shopify/sarama v1.36.0
 )
 
 require (

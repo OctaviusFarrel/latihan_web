@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/parnurzeal/gorequest"
+	"octaviusfarrel.dev/latihan_web/external"
 	"octaviusfarrel.dev/latihan_web/models"
 	"octaviusfarrel.dev/latihan_web/requests"
 	"octaviusfarrel.dev/latihan_web/responses"
@@ -19,96 +19,88 @@ type IReqresUseCase interface {
 	DeleteUser(context context.Context, index int) (code int, response responses.BaseResponse, err error)
 }
 
-type ReqresUseCase struct{}
-
-func NewReqresUseCase() *ReqresUseCase {
-	return &ReqresUseCase{}
+type ReqresUseCase struct {
+	reqresExternal external.IReqresExternal
 }
 
-func (ReqresUseCase) AllUsers(context context.Context) (code int, response responses.AllReqresUsers, err error) {
+func NewReqresUseCase() *ReqresUseCase {
+	return &ReqresUseCase{reqresExternal: external.NewReqresExternal()}
+}
+
+func (reqresUseCase *ReqresUseCase) AllUsers(context context.Context) (code int, response responses.AllReqresUsers, err error) {
 	code = http.StatusInternalServerError
 
 	var jsonBody struct {
 		Data []models.ReqresUser `json:"data"`
 	}
 
-	res, _, errs := gorequest.New().Get("https://reqres.in/api/users").EndStruct(&jsonBody)
+	code, err = reqresUseCase.reqresExternal.AllUsers(&jsonBody)
 
-	if len(errs) != 0 {
-		code = http.StatusBadRequest
-		err = errs[0]
+	if err != nil {
 
 		responses.NewBaseResponseStatusCode(code, &response.BaseResponse, err)
+		return
 	}
 
-	code = res.StatusCode
 	response.ReqresUsers = jsonBody.Data
 	responses.NewBaseResponseStatusCode(code, &response.BaseResponse, err)
 
 	return
 }
 
-func (ReqresUseCase) GetUser(context context.Context, index int) (code int, response responses.ReqresUser, err error) {
+func (reqresUseCase *ReqresUseCase) GetUser(context context.Context, index int) (code int, response responses.ReqresUser, err error) {
 	code = http.StatusInternalServerError
 
 	var jsonBody struct {
 		Data models.ReqresUser `json:"data"`
 	}
 
-	res, _, errs := gorequest.New().Get(fmt.Sprintf("https://reqres.in/api/users/%d", index)).EndStruct(&jsonBody)
+	code, err = reqresUseCase.reqresExternal.GetUser(index, &jsonBody)
 
-	if len(errs) != 0 {
-		code = http.StatusBadRequest
-		err = errs[0]
+	if err != nil {
 
 		responses.NewBaseResponseStatusCode(code, &response.BaseResponse, err)
+		return
 	}
 
-	code = res.StatusCode
 	response.ReqresUser = jsonBody.Data
 	responses.NewBaseResponseStatusCode(code, &response.BaseResponse, err)
 
 	return
 }
 
-func (ReqresUseCase) InsertUser(context context.Context, request requests.ReqresUserRequest) (code int, response responses.ReqresPostUser, err error) {
+func (reqresUseCase *ReqresUseCase) InsertUser(context context.Context, request requests.ReqresUserRequest) (code int, response responses.ReqresPostUser, err error) {
 	code = http.StatusInternalServerError
 
 	var jsonBody models.ReqresPostUser
 
-	_, _, errs := gorequest.New().Post("https://reqres.in/api/users/").Send(request).EndStruct(&jsonBody)
+	code, err = reqresUseCase.reqresExternal.InsertUser(request, &jsonBody)
 
-	if len(errs) != 0 {
-		code = http.StatusBadRequest
-		err = errs[0]
+	if err != nil {
 
 		responses.NewBaseResponseStatusCode(code, &response.BaseResponse, err)
 		return
 	}
 
-	code = http.StatusOK
 	response.ReqresPostUser = jsonBody
 	responses.NewBaseResponseStatusCode(code, &response.BaseResponse, err)
 
 	return
 }
 
-func (ReqresUseCase) UpdateUser(context context.Context, index int, request requests.ReqresUserRequest) (code int, response responses.ReqresPostUser, err error) {
+func (reqresUseCase *ReqresUseCase) UpdateUser(context context.Context, index int, request requests.ReqresUserRequest) (code int, response responses.ReqresPostUser, err error) {
 	code = http.StatusInternalServerError
 
 	var jsonBody models.ReqresPostUser
 
-	_, _, errs := gorequest.New().Put(fmt.Sprintf("https://reqres.in/api/users/%d", index)).Send(request).EndStruct(&jsonBody)
+	code, err = reqresUseCase.reqresExternal.UpdateUser(index, request, &jsonBody)
 
-	if len(errs) != 0 {
-		code = http.StatusBadRequest
-		err = errs[0]
+	if err != nil {
 
 		responses.NewBaseResponseStatusCode(code, &response.BaseResponse, err)
 		return
 	}
 
-	code = http.StatusOK
 	response.ReqresPostUser = jsonBody
 	response.ReqresPostUser.ID = fmt.Sprintf("%d", index)
 	responses.NewBaseResponseStatusCode(code, &response.BaseResponse, err)
@@ -116,19 +108,17 @@ func (ReqresUseCase) UpdateUser(context context.Context, index int, request requ
 	return
 }
 
-func (ReqresUseCase) DeleteUser(context context.Context, index int) (code int, response responses.BaseResponse, err error) {
+func (reqresUseCase *ReqresUseCase) DeleteUser(context context.Context, index int) (code int, response responses.BaseResponse, err error) {
 	code = http.StatusInternalServerError
 
-	res, _, errs := gorequest.New().Delete(fmt.Sprintf("https://reqres.in/api/users/%d", index)).End()
+	code, err = reqresUseCase.reqresExternal.DeleteUser(index, struct{}{})
 
-	if len(errs) != 0 {
-		code = http.StatusBadRequest
-		err = errs[0]
+	if err != nil {
 
 		responses.NewBaseResponseStatusCode(code, &response, err)
+		return
 	}
 
-	code = res.StatusCode
 	responses.NewBaseResponseStatusCode(code, &response, err)
 
 	return
