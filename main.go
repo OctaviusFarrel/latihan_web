@@ -1,11 +1,10 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/Shopify/sarama"
 	"github.com/gin-gonic/gin"
 	"octaviusfarrel.dev/latihan_web/controllers"
+	logger_local "octaviusfarrel.dev/latihan_web/lib/log"
 	"octaviusfarrel.dev/latihan_web/models"
 	"octaviusfarrel.dev/latihan_web/repositories/pgsql"
 	"octaviusfarrel.dev/latihan_web/services"
@@ -13,7 +12,6 @@ import (
 
 func main() {
 	app := gin.New()
-	app.Use(gin.Logger())
 
 	{
 		producer, err := sarama.NewAsyncProducer([]string{"localhost:9092"}, sarama.NewConfig())
@@ -23,7 +21,10 @@ func main() {
 		}
 
 		app.Use(func(ctx *gin.Context) {
-			message := &sarama.ProducerMessage{Topic: "logs", Value: sarama.StringEncoder(fmt.Sprintf("Handler : %s", ctx.HandlerName()))}
+			log := logger_local.NewLogger()
+			log.Log(ctx.HandlerName(), 0)
+
+			message := &sarama.ProducerMessage{Topic: "logs", Value: sarama.StringEncoder(log.String(ctx.HandlerName(), 0))}
 			producer.Input() <- message
 		})
 	}
