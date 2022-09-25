@@ -2,25 +2,13 @@ package services
 
 import (
 	"context"
-	"math/rand"
 	"net/http"
-	"os"
-	"strings"
-	"time"
 
-	"github.com/golang-jwt/jwt/v4"
-	"github.com/subosito/gotenv"
-	"octaviusfarrel.dev/latihan_web/models"
+	token_util "octaviusfarrel.dev/latihan_web/lib/token"
 	"octaviusfarrel.dev/latihan_web/repositories/pgsql"
 	"octaviusfarrel.dev/latihan_web/requests"
 	"octaviusfarrel.dev/latihan_web/responses"
 )
-
-var secretKey = func() (result string) {
-	gotenv.Load()
-	result = os.Getenv("TOKEN_SECRET")
-	return
-}()
 
 type IUserUsecase interface {
 	GetUserByUsername(c context.Context, requestBody requests.UserRequest) (response responses.UserWithToken, statusCode int, err error)
@@ -31,11 +19,11 @@ type IUserUsecase interface {
 
 type UserUsecase struct {
 	userRepo  pgsql.IUserRepo
-	tokenRepo pgsql.ITokenRepo
+	tokenUtil *token_util.TokenUtil
 }
 
-func NewUserUseCase(userRepo pgsql.IUserRepo, tokenRepo pgsql.ITokenRepo) *UserUsecase {
-	return &UserUsecase{userRepo: userRepo, tokenRepo: tokenRepo}
+func NewUserUseCase(userRepo pgsql.IUserRepo, tokenUtil *token_util.TokenUtil) *UserUsecase {
+	return &UserUsecase{userRepo: userRepo, tokenUtil: tokenUtil}
 }
 
 func (useCase *UserUsecase) GetUserByUsername(c context.Context, requestBody requests.UserRequest) (response responses.UserWithToken, statusCode int, err error) {
@@ -48,13 +36,15 @@ func (useCase *UserUsecase) GetUserByUsername(c context.Context, requestBody req
 
 		return
 	}
-	// token, err := createToken(user)
-	// if err != nil {
-	// 	statusCode = http.StatusInternalServerError
-	// 	responses.NewBaseResponseStatusCode(statusCode, &response.BaseResponse, err)
 
-	// 	return
-	// }
+	token, err := useCase.tokenUtil.CreateToken(user)
+
+	if err != nil {
+		statusCode = http.StatusInternalServerError
+		responses.NewBaseResponseStatusCode(statusCode, &response.BaseResponse, err)
+
+		return
+	}
 
 	// token, err = useCase.tokenRepo.InsertTokenByUser(int(user.ID), token)
 
@@ -66,7 +56,7 @@ func (useCase *UserUsecase) GetUserByUsername(c context.Context, requestBody req
 	// }
 
 	statusCode = http.StatusOK
-	response.Token = user.Username
+	response.Token = token
 	response.User.User = user
 	responses.NewBaseResponseStatusCode(statusCode, &response.BaseResponse, err)
 
@@ -95,27 +85,4 @@ func (useCase *UserUsecase) UpdateUser(c context.Context) (response responses.Us
 
 func (useCase *UserUsecase) DeleteUser(c context.Context) (response responses.User, statusCode int, err error) {
 	return
-}
-
-const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-
-func randomString(n int) string {
-	sb := strings.Builder{}
-	sb.Grow(n)
-	for i := 0; i < n; i++ {
-		sb.WriteByte(charset[rand.Intn(len(charset))])
-	}
-	return sb.String()
-}
-
-func createToken(user models.UserModel) (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"created_at": time.Now().Unix(),
-		"salt":       randomString(24),
-	})
-	tokenString, err := token.SignedString([]byte(secretKey))
-	if err != nil {
-		return "", err
-	}
-	return tokenString, nil
 }

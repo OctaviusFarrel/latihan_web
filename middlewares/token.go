@@ -2,92 +2,92 @@ package middlewares
 
 import (
 	"net/http"
-	"regexp"
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"octaviusfarrel.dev/latihan_web/utils"
+	token "octaviusfarrel.dev/latihan_web/lib/token"
 )
 
-func ReadRequiredTokenMiddleware() gin.HandlerFunc {
+type ITokenMiddleware interface {
+	ReadToken() gin.HandlerFunc
+	WriteToken() gin.HandlerFunc
+}
+
+type TokenMiddleware struct {
+	tokenUtil *token.TokenUtil
+}
+
+func NewTokenMiddleware(tokenUtil *token.TokenUtil) *TokenMiddleware {
+	return &TokenMiddleware{tokenUtil: tokenUtil}
+}
+
+func (tokenMiddleware *TokenMiddleware) ReadToken() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if value := c.GetHeader("Token"); len(value) == 0 {
+		value := c.GetHeader("Authorization")
+		if len(value) == 0 {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"message": "Failed",
 				"data":    "Token is empty",
 			})
 			c.Abort()
 			return
-		} else {
-			token, returned := utils.ValidateToken(value, c.Request.Context())
-			if !returned {
-				c.JSON(http.StatusBadRequest, gin.H{
-					"message": "Failed",
-					"data":    "invalid token",
-				})
-				c.Abort()
-				return
-			}
-			value := strings.Split(value, "|")
-			if len(value) < 2 {
-				c.JSON(http.StatusBadRequest, gin.H{
-					"message": "Failed",
-					"data":    "invalid token",
-				})
-				c.Abort()
-				return
-			}
+		}
 
-			if len(regexp.MustCompile(token).FindString("read")) == 0 {
-				c.JSON(http.StatusBadRequest, gin.H{
-					"message": "Failed",
-					"data":    "insufficient permission",
-				})
-				c.Abort()
-				return
-			}
+		valueArray := strings.Split(value, " ")
+		if len(valueArray) < 2 {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": "Failed",
+				"data":    "invalid token format",
+			})
+			c.Abort()
+			return
+		}
+		value = valueArray[1]
+
+		err := tokenMiddleware.tokenUtil.ValidateToken(value, "read")
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": "Failed",
+				"data":    "invalid token permission",
+			})
+			c.Abort()
+			return
 		}
 		c.Next()
 	}
 }
 
-func WriteRequiredTokenMiddleware() gin.HandlerFunc {
+func (tokenMiddleware *TokenMiddleware) WriteToken() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if value := c.GetHeader("Token"); len(value) == 0 {
+		value := c.GetHeader("Authorization")
+		if len(value) == 0 {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"message": "Failed",
 				"data":    "Token is empty",
 			})
 			c.Abort()
 			return
-		} else {
-			token, returned := utils.ValidateToken(value, c.Request.Context())
-			if !returned {
-				c.JSON(http.StatusBadRequest, gin.H{
-					"message": "Failed",
-					"data":    "invalid token",
-				})
-				c.Abort()
-				return
-			}
-			value := strings.Split(value, "|")
-			if len(value) < 2 {
-				c.JSON(http.StatusBadRequest, gin.H{
-					"message": "Failed",
-					"data":    "invalid token",
-				})
-				c.Abort()
-				return
-			}
+		}
 
-			if len(regexp.MustCompile(token).FindString("write")) == 0 {
-				c.JSON(http.StatusBadRequest, gin.H{
-					"message": "Failed",
-					"data":    "insufficient permission",
-				})
-				c.Abort()
-				return
-			}
+		valueArray := strings.Split(value, " ")
+		if len(valueArray) < 2 {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": "Failed",
+				"data":    "invalid token format",
+			})
+			c.Abort()
+			return
+		}
+		value = valueArray[1]
+
+		err := tokenMiddleware.tokenUtil.ValidateToken(value, "write")
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": "Failed",
+				"data":    "invalid token permission",
+			})
+			c.Abort()
+			return
 		}
 		c.Next()
 	}

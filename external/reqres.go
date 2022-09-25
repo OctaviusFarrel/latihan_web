@@ -15,15 +15,19 @@ type IReqresExternal interface {
 	DeleteUser(index int, jsonBody any) (code int, err error)
 }
 
-type ReqresExternal struct{}
+type ReqresExternal struct {
+	goRequest *gorequest.SuperAgent
+}
 
 func NewReqresExternal() *ReqresExternal {
-	return &ReqresExternal{}
+	return &ReqresExternal{
+		goRequest: gorequest.New(),
+	}
 }
 
-func (ReqresExternal) AllUsers(jsonBody any) (code int, err error) {
+func (reqresExternal *ReqresExternal) AllUsers(jsonBody any) (code int, err error) {
 
-	res, _, errs := gorequest.New().Get("https://reqres.in/api/users").EndStruct(&jsonBody)
+	res, _, errs := reqresExternal.goRequest.Get("https://reqres.in/api/users").EndStruct(&jsonBody)
 
 	if len(errs) != 0 {
 		err = errs[0]
@@ -33,8 +37,8 @@ func (ReqresExternal) AllUsers(jsonBody any) (code int, err error) {
 	return
 }
 
-func (ReqresExternal) GetUser(index int, jsonBody any) (code int, err error) {
-	res, _, errs := gorequest.New().Get(fmt.Sprintf("https://reqres.in/api/users/%d", index)).EndStruct(&jsonBody)
+func (reqresExternal *ReqresExternal) GetUser(index int, jsonBody any) (code int, err error) {
+	res, _, errs := reqresExternal.goRequest.Get(fmt.Sprintf("https://reqres.in/api/users/%d", index)).EndStruct(&jsonBody)
 
 	if len(errs) != 0 {
 		err = errs[0]
@@ -44,8 +48,8 @@ func (ReqresExternal) GetUser(index int, jsonBody any) (code int, err error) {
 	return
 }
 
-func (ReqresExternal) InsertUser(request requests.ReqresUserRequest, jsonBody any) (code int, err error) {
-	res, _, errs := gorequest.New().Post("https://reqres.in/api/users/").Send(request).EndStruct(&jsonBody)
+func (reqresExternal *ReqresExternal) InsertUser(request requests.ReqresUserRequest, jsonBody any) (code int, err error) {
+	res, _, errs := reqresExternal.goRequest.Post("https://reqres.in/api/users/").Send(request).EndStruct(&jsonBody)
 
 	if len(errs) != 0 {
 		err = errs[0]
@@ -55,8 +59,8 @@ func (ReqresExternal) InsertUser(request requests.ReqresUserRequest, jsonBody an
 	return
 }
 
-func (ReqresExternal) UpdateUser(index int, request requests.ReqresUserRequest, jsonBody any) (code int, err error) {
-	res, _, errs := gorequest.New().Put(fmt.Sprintf("https://reqres.in/api/users/%d", index)).Send(request).EndStruct(&jsonBody)
+func (reqresExternal *ReqresExternal) UpdateUser(index int, request requests.ReqresUserRequest, jsonBody any) (code int, err error) {
+	res, _, errs := reqresExternal.goRequest.Put(fmt.Sprintf("https://reqres.in/api/users/%d", index)).Send(request).EndStruct(&jsonBody)
 
 	if len(errs) != 0 {
 		err = errs[0]
@@ -66,8 +70,8 @@ func (ReqresExternal) UpdateUser(index int, request requests.ReqresUserRequest, 
 	return
 }
 
-func (ReqresExternal) DeleteUser(index int, jsonBody any) (code int, err error) {
-	res, _, errs := gorequest.New().Delete(fmt.Sprintf("https://reqres.in/api/users/%d", index)).EndStruct(&jsonBody)
+func (reqresExternal *ReqresExternal) DeleteUser(index int, jsonBody any) (code int, err error) {
+	res, _, errs := reqresExternal.goRequest.Delete(fmt.Sprintf("https://reqres.in/api/users/%d", index)).EndStruct(&jsonBody)
 
 	if len(errs) != 0 {
 		err = errs[0]

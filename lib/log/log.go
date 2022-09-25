@@ -1,12 +1,13 @@
 package lib
 
 import (
+	"os"
+
 	"github.com/sirupsen/logrus"
 )
 
 type ILogger interface {
-	Log(useCase string, level int)
-	String(useCase string, level int) string
+	Log(fields map[string]interface{}, message string, level int)
 }
 
 type Logger struct {
@@ -16,37 +17,22 @@ type Logger struct {
 func NewLogger() ILogger {
 	log := logrus.New()
 
-	log.SetFormatter(&logrus.JSONFormatter{
-		PrettyPrint: true,
-	})
+	log.SetOutput(os.Stdout)
+	log.SetFormatter(&logrus.JSONFormatter{})
 
 	return &Logger{log: log}
 }
 
-func (logger *Logger) Log(useCase string, level int) {
-	field := logrus.Fields{
-		"use_case": useCase,
-	}
+func (logger *Logger) Log(fields map[string]interface{}, message string, level int) {
 
 	switch level {
 	case 0:
-		logger.log.WithFields(field).Info("Test")
+		logger.log.WithFields(fields).Info(message)
 	case 1:
-		logger.log.WithFields(field).Warning("Test")
+		logger.log.WithFields(fields).Warning(message)
 	case 2:
-		logger.log.WithFields(field).Error("Test")
+		logger.log.WithFields(fields).Error(message)
 	case 3:
-		logger.log.WithFields(field).Fatal("Test")
+		logger.log.WithFields(fields).Fatal(message)
 	}
-}
-
-func (logger *Logger) String(useCase string, level int) (result string) {
-	field := logrus.Fields{
-		"use_case": useCase,
-	}
-
-	result, _ = logger.log.WithFields(field).String()
-
-	return
-
 }

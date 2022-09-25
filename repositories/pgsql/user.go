@@ -38,6 +38,5 @@ func (repo *UserRepo) GetUserByUsername(userRequest requests.UserRequest) (user 
 		"username": userRequest.Username,
 		"password": fmt.Sprintf("%x", sha256.Sum256([]byte(userRequest.Password))),
 	}).First(&user).Scan(&user).Error
-	fmt.Println(user)
 	return
 }

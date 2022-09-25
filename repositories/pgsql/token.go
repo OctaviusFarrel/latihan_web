@@ -2,11 +2,15 @@ package pgsql
 
 import (
 	"context"
+	"fmt"
+	"regexp"
+
+	"octaviusfarrel.dev/latihan_web/models"
 )
 
 type ITokenRepo interface {
-	InsertTokenByUser(userId int, token string) (result string, err error)
-	ValidateToken(token string, ctx context.Context) (result string, err error)
+	InsertTokenByUser(tokenModel models.TokenModel) (err error)
+	ValidateToken(token string, permission string, ctx context.Context) (err error)
 }
 
 type TokenRepo struct{}
@@ -15,58 +19,31 @@ func NewTokenRepo() *TokenRepo {
 	return &TokenRepo{}
 }
 
-func (tokenRepo *TokenRepo) InsertTokenByUser(userId int, token string) (result string, err error) {
-	// sequence, err := dbPool.Query(context.Background(), "SELECT NEXTVAL('user_tokens_id_seq')")
+func (tokenRepo *TokenRepo) InsertTokenByUser(tokenModel models.TokenModel) (err error) {
 
-	// if err != nil {
-	// 	return
-	// }
-
-	// var value int
-	// sequence.Next()
-	// sequence.Scan(&value)
-
-	// _, err = dbPool.Query(context.Background(), "INSERT INTO user_tokens (id,token,user_id) VALUES ($1,$2,$3)", value, fmt.Sprintf("%d|%s", value, token), userId)
-
-	// if err != nil {
-	// 	return
-	// }
-
-	// data, err := dbPool.Query(context.Background(), "SELECT token FROM user_tokens WHERE id = $1", value)
-	// if err != nil {
-	// 	return
-	// }
-	// data.Next()
-	// data.Scan(&result)
+	err = dbPool.Create(&tokenModel).Error
 	return
 }
 
-func (tokenRepo *TokenRepo) ValidateToken(token string, ctx context.Context) (result string, err error) {
-	// fmt.Println("token validation")
-	// row, err := dbPool.Query(ctx, "SELECT user_id from user_tokens WHERE token = $1", token)
-	// if err != nil {
-	// 	return
-	// }
-	// fmt.Println("token validated")
+func (tokenRepo *TokenRepo) ValidateToken(token string, permission string, ctx context.Context) (err error) {
+	tokenModel := models.TokenModel{}
 
-	// if !row.Next() {
-	// 	err = fmt.Errorf("token is invalid")
-	// 	return
-	// }
+	err = dbPool.WithContext(ctx).First(&tokenModel, "hash_token = ?", token).Error
 
-	// var i int
-	// row.Scan(&i)
+	if err != nil {
+		return
+	}
 
-	// row, err = dbPool.Query(ctx, "SELECT permission from users WHERE id = $1", i)
-	// if err != nil {
-	// 	return
-	// }
+	err = dbPool.WithContext(ctx).First(&tokenModel.User, "id = ?", tokenModel.TokenBelongsTo).Error
 
-	// if !row.Next() {
-	// 	err = fmt.Errorf("token has no permission")
-	// 	return
-	// }
+	if err != nil {
+		return
+	}
 
-	// row.Scan(&result)
+	if len(regexp.MustCompile(tokenModel.User.Permission).FindString(permission)) == 0 {
+		err = fmt.Errorf("token for id: %d", tokenModel.User.ID)
+		return
+	}
+
 	return
 }
